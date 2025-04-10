@@ -18,15 +18,15 @@ container_info = {}
 log_dir = "kuzco_daily_log"
 os.makedirs(log_dir, exist_ok=True)
 log_filename = os.path.join(log_dir, datetime.now().strftime("inference_log_%Y-%m-%d.log"))
-current_day = datetime.now().date()
 volume_path = os.path.expanduser("~/.kuzco/models")
+current_day = datetime.now().date()
 
 def run_command(command):
     try:
         process = subprocess.run(command, capture_output=True, text=True, check=True)
         return process.stdout.strip()
     except subprocess.CalledProcessError as e:
-        #print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} {RED}💀 错误执行命令: {command}{RESET}\n错误信息: {e.stderr.strip()}")
+        print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} {RED}💀 错误执行命令: {command}{RESET}\n错误信息: {e.stderr.strip()}")
         return None
 
 def detect_gpu():
@@ -55,13 +55,9 @@ def detect_gpu():
 
 def start_container(gpu_id, gpu_type):
     if gpu_type == "nvidia":
-        base_command = ['docker', 'run', '-d', '--rm', '--runtime=nvidia', '--gpus', f'"device={gpu_id}"', '-e',
-                        'CACHE_DIRECTORY=/root/models', '-v', f'{volume_path}:/root/models',
-                        'kuzcoxyz/amd64-ollama-nvidia-worker'] + startup_code.split()
+        base_command = ['docker', 'run', '-d', '--rm', '--runtime=nvidia', '--gpus', f'"device={gpu_id}"', '-e', 'CACHE_DIRECTORY=/root/models', '-v', f'{volume_path}:/root/models',  'kuzcoxyz/amd64-ollama-nvidia-worker'] + startup_code.split()
     elif gpu_type == "amd":
-        base_command = ['docker', 'run', '--rm', '--device=/dev/kfd', f'--device=/dev/dri/renderD{gpu_id}',
-                        '--group-add', 'video', '--group-add', '110', '--security-opt', 'seccomp=unconfined', '-d',
-                        'kuzcoxyz/workeramd:latest'] + startup_code.split()
+        base_command = ['docker', 'run', '--rm' ,'--device=/dev/kfd', f'--device=/dev/dri/renderD{gpu_id}', '--group-add', 'video', '--group-add', '110', '--security-opt', 'seccomp=unconfined', '-d', 'kuzcoxyz/workeramd:latest'] + startup_code.split()
 
     output = run_command(base_command)
     if output:
@@ -83,19 +79,14 @@ def start_containers(gpu_type, gpu_devices):
             gpu_id, vram_mib = device
 
         if vram_mib >= model_vram_mib:
-            num_containers = vram_mib // model_vram_mib
-            print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} 📟️ [GPU:{YELLOW}{gpu_id}{RESET} 显存:{YELLOW}{vram_mib}{RESET}MiB] 最大启动数量: {YELLOW}{num_containers}{RESET}")
-            time.sleep(2)
-            for _ in range(num_containers):
-                start_container(gpu_id, gpu_type)
-                time.sleep(5)
-            # start_container(gpu_id, gpu_type)
+            start_container(gpu_id, gpu_type)
             time.sleep(5)
         else:
             print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} {YELLOW}⚠️ GPU {gpu_id} 的显存不足, 跳过启动容器{RESET}")
 
 def monitor_containers(gpu_type):
     finished_count = 0
+    timeout_count = 0
     containers_to_remove = []
     for cid in list(container_info.keys()):
         inspect_command = ['docker', 'inspect', '--format', '{{.State.Status}}', cid]
@@ -119,11 +110,11 @@ def monitor_containers(gpu_type):
         new_logs = full_logs[previous_position:]
         log_positions[cid] = len(full_logs)
         finished_occurrences = new_logs.count('/api/tags')
-        # finished_occurrences = new_logs.count('finished')
+        timeout_occurrences = new_logs.count('timeout')
         finished_count += finished_occurrences
-
-        if finished_occurrences == 0:
-            print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} ⚠️ 容器 {YELLOW}{cid[:12]}{RESET} 在本周期内未完成任何推理")
+        timeout_count += timeout_occurrences
+        if finished_occurrences == 0 or timeout_count > 50:
+            print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} ⚠️ 容器 {YELLOW}{cid[:12]}{RESET} 在本周期内未完成任何推理 / 超时次数过多")
             time.sleep(1)
             gpu_id = container_info[cid]
             stop_and_clean_container(cid)
@@ -158,7 +149,7 @@ def log_inference_count(finished_count, daily_total):
     daily_total += finished_count
     with open(log_filename, 'w') as log_file:
         log_file.write(f"{datetime.now().strftime('%Y-%m-%d')} - {daily_total}\n")
-    print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} 💻 {check_interval // 60}分钟请求量: {GREEN}{finished_count}{RESET} | 📊 今日请求量: {GREEN}{daily_total}{RESET}")
+    print(f"{datetime.now().strftime('%Y-%m-%d|%H:%M:%S')} 💻 {check_interval // 60}分钟推理量: {GREEN}{finished_count}{RESET} | 📊 今日推理量: {GREEN}{daily_total}{RESET}")
     return daily_total
 
 def stop_and_clean_container(cid):
