@@ -9,7 +9,7 @@
 ## 📌 项目简介
 
 该脚本为 Inference Epoch 2 提供了 **一键部署、自动重启和多开** 的完整解决方案。  
-基于 [Singosol 原项目](https://github.com/singosol/kuzco-docker) 进行 Fork，并根据实测对官方 Epoch 2 的更新进行了适配与优化。
+基于 [Singosol 原项目](https://github.com/singosol/kuzco-docker) 进行 Fork，并根据官方 Epoch 2 的更新进行了适配与优化。
 
 主要优化内容包括：
 - 自动重启
