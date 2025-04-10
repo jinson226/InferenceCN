@@ -1,6 +1,5 @@
-# InferenceCN
+# Inference（原 Kuzco）Epoch 2 最新一键自动重启 + 多开脚本
 
-**Inference（原 Kuzco）Epoch 2 四月更新版一键自动重启 + 多开脚本**  
 **作者：J1N，KuzCommunityCN Founder**  
 **推特：[ @J1N226 ](https://twitter.com/J1N226)**（关注推特私信拉交流群）
 
@@ -50,9 +49,8 @@ python3 kzco.py -c "--worker XXX --code XXX"
 
 ---
 
-# InferenceEN
+# Inference (formerly Kuzco) Epoch 2 One-Click Auto-Restart & Multi-Instance Script
 
-**Inference (formerly Kuzco) Epoch 2 – April Update: One-Click Auto-Restart & Multi-Instance Script**  
 **Author: J1N, Founder of KuzCommunityCN**  
 **Twitter: [@J1N226](https://twitter.com/J1N226)** 
 
