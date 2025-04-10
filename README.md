@@ -1,3 +1,4 @@
+# 多开部分代码需优化，请稍等。
 # Inference（原 Kuzco）Epoch 2 最新一键自动重启 + 多开脚本
 
 **作者：J1N，KuzCommunityCN Founder**  
