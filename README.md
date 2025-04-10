@@ -11,7 +11,7 @@
 基于 [Singosol 原项目](https://github.com/singosol/kuzco-docker) 进行 Fork，并根据实测对官方 Epoch 2 的更新进行了适配与优化。
 
 主要优化内容包括：
-- 自动识别 GPU 显存
+- 自动重启
 - 根据显存自动多开运行
 - 脚本内含详细注释，方便根据不同设备灵活调整参数
 
