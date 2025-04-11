@@ -39,12 +39,19 @@
 ## 🛠️ 使用方法
 
 在终端输入以下指令运行脚本： 
-
+- 单开
 ```bash
 python3 kzco.py -c "--worker XXX --code XXX"
 ```
+- 多开
+```bash
+python3 kzco.py -c "--worker1 XXX --code XXX"
+python3 kzco.py -c "--worker2 XXX --code XXX"
+python3 kzco.py -c "--worker3 XXX --code XXX"
+python3 kzco.py -c "--worker4 XXX --code XXX"
+```
 
-> 参数 `"--worker XXX --code XXX"` 来自官方 Inference 平台创建 Worker 时选择 Docker 方式所自动生成的命令。
+> 参数 `"--worker XXX --code XXX"` 来自官方 Inference 平台创建 Worker 时选择 Docker 方式所自动生成的命令，多开需要生成多个worker。
 
 ---
 
